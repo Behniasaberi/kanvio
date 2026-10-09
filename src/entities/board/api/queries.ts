@@ -38,7 +38,7 @@ export const getBoardWithColumns = cache(
         .order("position", { ascending: true }),
       supabase
         .from("tasks")
-        .select("id, title, priority, position, column_id")
+        .select("id, title, description, priority, position, column_id, assignee_id")
         .eq("board_id", boardId)
         .order("position", { ascending: true }),
     ]);
@@ -51,9 +51,11 @@ export const getBoardWithColumns = cache(
     const tasks: Task[] = (tasksRes.data ?? []).map((row) => ({
       id: row.id,
       title: row.title,
+      description: row.description,
       priority: row.priority,
       position: row.position,
       columnId: row.column_id,
+      assigneeId: row.assignee_id,
     }));
 
     return {

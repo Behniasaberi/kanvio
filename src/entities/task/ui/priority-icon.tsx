@@ -1,19 +1,11 @@
 import { CircleAlert, SignalHigh, SignalLow, SignalMedium } from "lucide-react";
-import type { Priority } from "../model/types";
-
-const LABELS: Record<Priority, string> = {
-  none: "No priority",
-  low: "Low",
-  medium: "Medium",
-  high: "High",
-  urgent: "Urgent",
-};
+import { PRIORITY_LABELS, type Priority } from "../model/types";
 
 export function PriorityIcon({ priority }: { priority: Priority }) {
   if (priority === "none") return null;
 
   const className = "size-4 shrink-0";
-  const label = LABELS[priority];
+  const label = PRIORITY_LABELS[priority];
 
   switch (priority) {
     case "urgent":

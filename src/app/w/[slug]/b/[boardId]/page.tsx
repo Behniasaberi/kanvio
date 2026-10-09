@@ -1,6 +1,9 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { getWorkspaceBySlug } from "@/entities/workspace/server";
+import {
+  getWorkspaceBySlug,
+  getWorkspaceMembers,
+} from "@/entities/workspace/server";
 import { getBoardWithColumns } from "@/entities/board/server";
 import { BoardView } from "@/widgets/board-view";
 import { isUuid } from "@/shared/lib/is-uuid";
@@ -32,7 +35,9 @@ async function Board({ slug, boardId }: { slug: string; boardId: string }) {
     notFound();
   }
 
-  return <BoardView board={board} />;
+  const members = await getWorkspaceMembers(workspace.id);
+
+  return <BoardView board={board} members={members} />;
 }
 
 function BoardSkeleton() {

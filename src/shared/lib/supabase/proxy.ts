@@ -38,6 +38,12 @@ export async function updateSession(request: NextRequest) {
   const { data } = await supabase.auth.getClaims();
   const isLoggedIn = Boolean(data?.claims);
 
+  // Only redirect page navigations. Form submissions (Server Actions) are
+  // POST requests and expect a special response, not a redirect page.
+  if (request.method !== "GET") {
+    return response;
+  }
+
   const { pathname } = request.nextUrl;
   const isProtected = PROTECTED_ROUTES.some((route) =>
     pathname.startsWith(route),
