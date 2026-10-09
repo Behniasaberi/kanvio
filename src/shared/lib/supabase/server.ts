@@ -1,9 +1,13 @@
 import "server-only";
 import { cookies } from "next/headers";
+import { connection } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import { env } from "@/shared/config/env";
 
 export async function createClient() {
+  // Supabase reads the clock and calls the network, so it must only run
+  // on a real request, never while Next.js prerenders or prefetches.
+  await connection();
   const cookieStore = await cookies();
 
   return createServerClient(env.supabaseUrl, env.supabasePublishableKey, {
