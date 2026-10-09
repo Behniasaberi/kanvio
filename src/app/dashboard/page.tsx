@@ -3,12 +3,12 @@ import { Suspense } from "react";
 import { getCurrentUser } from "@/entities/user";
 import { SignOutButton } from "@/features/auth";
 
-export const metadata: Metadata = { title: "Dashboard · Task Board" };
+export const metadata: Metadata = { title: "Dashboard" };
 
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen bg-zinc-950 p-8 text-zinc-100">
-      <Suspense fallback={<p className="text-sm text-zinc-500">Loading…</p>}>
+    <main className="min-h-screen p-8">
+      <Suspense fallback={<p className="text-sm text-fg-subtle">Loading…</p>}>
         <Welcome />
       </Suspense>
     </main>
@@ -24,7 +24,7 @@ async function Welcome() {
         <h1 className="text-xl font-semibold">
           Welcome, {user.fullName ?? user.email}
         </h1>
-        <p className="text-sm text-zinc-400">{user.email}</p>
+        <p className="text-sm text-fg-muted">{user.email}</p>
       </div>
       <SignOutButton />
     </div>

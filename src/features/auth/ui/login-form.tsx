@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useActionState } from "react";
+import { Button, Input, Label } from "@/shared/ui";
 import { signIn, type AuthFormState } from "../api/actions";
 
 const initialState: AuthFormState = { error: null };
@@ -13,55 +14,47 @@ export function LoginForm() {
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold">Log in to Task Board</h1>
-        <p className="text-sm text-zinc-400">Welcome back.</p>
+        <p className="text-sm text-fg-muted">Welcome back.</p>
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="email" className="text-sm text-zinc-300">
-          Email
-        </label>
-        <input
+        <Label htmlFor="email">Email</Label>
+        <Input
           id="email"
           name="email"
           type="email"
           autoComplete="email"
           required
           defaultValue={state.fields?.email}
-          className="h-9 rounded-md border border-zinc-800 bg-zinc-900 px-3 text-sm outline-none focus:border-zinc-600"
+          aria-invalid={Boolean(state.error)}
         />
       </div>
 
       <div className="flex flex-col gap-1.5">
-        <label htmlFor="password" className="text-sm text-zinc-300">
-          Password
-        </label>
-        <input
+        <Label htmlFor="password">Password</Label>
+        <Input
           id="password"
           name="password"
           type="password"
           autoComplete="current-password"
           required
-          className="h-9 rounded-md border border-zinc-800 bg-zinc-900 px-3 text-sm outline-none focus:border-zinc-600"
+          aria-invalid={Boolean(state.error)}
         />
       </div>
 
       {state.error && (
-        <p role="alert" className="text-sm text-red-400">
+        <p role="alert" className="text-sm text-danger">
           {state.error}
         </p>
       )}
 
-      <button
-        type="submit"
-        disabled={isPending}
-        className="h-9 rounded-md bg-zinc-100 text-sm font-medium text-zinc-900 transition-colors hover:bg-white disabled:opacity-50"
-      >
+      <Button type="submit" disabled={isPending}>
         {isPending ? "Logging in…" : "Log in"}
-      </button>
+      </Button>
 
-      <p className="text-center text-sm text-zinc-400">
+      <p className="text-center text-sm text-fg-muted">
         No account?{" "}
-        <Link href="/signup" className="text-zinc-100 hover:underline">
+        <Link href="/signup" className="text-accent-text hover:underline">
           Sign up
         </Link>
       </p>

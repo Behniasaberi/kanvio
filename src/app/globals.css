@@ -1,26 +1,56 @@
 @import "tailwindcss";
 
+/* =========================================================
+   Design tokens — Task Board (dark-first, Linear-inspired)
+   Use them as Tailwind classes: bg-surface, text-fg-muted,
+   border-border, bg-accent, ...
+   ========================================================= */
+@theme {
+  /* surfaces (back to front) */
+  --color-bg: #0b0b0d;
+  --color-surface: #141417;
+  --color-surface-hover: #1c1c21;
+  --color-surface-active: #232329;
+
+  /* borders */
+  --color-border: #26262b;
+  --color-border-strong: #34343b;
+
+  /* text */
+  --color-fg: #f4f4f5;
+  --color-fg-muted: #a1a1aa;
+  --color-fg-subtle: #8a8a93;
+
+  /* brand: warm purple */
+  --color-accent: #9150e6;
+  --color-accent-hover: #8545db;
+  --color-accent-fg: #ffffff;
+  --color-accent-text: #bb8cff;
+
+  /* status */
+  --color-danger: #f87171;
+  --color-success: #4ade80;
+
+  /* shape */
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+
+  /* type */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+}
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  color-scheme: dark;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+}
+
+::selection {
+  background: color-mix(in srgb, var(--color-accent) 40%, transparent);
 }
