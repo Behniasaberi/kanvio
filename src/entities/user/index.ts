@@ -1,2 +1,2 @@
-export { getCurrentUser } from "./api/get-current-user";
+// Client-safe public API. Server helpers live in ./server.
 export type { CurrentUser } from "./model/types";

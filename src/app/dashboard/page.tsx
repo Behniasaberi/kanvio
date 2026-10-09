@@ -1,32 +1,24 @@
-import type { Metadata } from "next";
+import { redirect } from "next/navigation";
 import { Suspense } from "react";
-import { getCurrentUser } from "@/entities/user";
-import { SignOutButton } from "@/features/auth";
+import { getCurrentUser } from "@/entities/user/server";
+import { getMyWorkspaces } from "@/entities/workspace/server";
 
-export const metadata: Metadata = { title: "Dashboard" };
-
+// Entry point after login: send the user to their first workspace,
+// or to onboarding if they don't have one yet.
 export default function DashboardPage() {
   return (
-    <main className="min-h-screen p-8">
-      <Suspense fallback={<p className="text-sm text-fg-subtle">Loading…</p>}>
-        <Welcome />
-      </Suspense>
-    </main>
+    <Suspense fallback={null}>
+      <WorkspaceRedirect />
+    </Suspense>
   );
 }
 
-async function Welcome() {
-  const user = await getCurrentUser();
+async function WorkspaceRedirect(): Promise<never> {
+  await getCurrentUser();
+  const workspaces = await getMyWorkspaces();
 
-  return (
-    <div className="flex items-center justify-between">
-      <div>
-        <h1 className="text-xl font-semibold">
-          Welcome, {user.fullName ?? user.email}
-        </h1>
-        <p className="text-sm text-fg-muted">{user.email}</p>
-      </div>
-      <SignOutButton />
-    </div>
-  );
+  if (workspaces.length === 0) {
+    redirect("/workspaces/new");
+  }
+  redirect(`/w/${workspaces[0].slug}`);
 }
