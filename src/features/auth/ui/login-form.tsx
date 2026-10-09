@@ -13,7 +13,7 @@ export function LoginForm() {
   return (
     <form action={formAction} className="flex flex-col gap-4">
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold">Log in to Task Board</h1>
+        <h1 className="text-xl font-semibold">Log in to Kanvio</h1>
         <p className="text-sm text-fg-muted">Welcome back.</p>
       </div>
 

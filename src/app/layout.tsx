@@ -14,8 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: "Task Board",
-    template: "%s · Task Board",
+    default: "Kanvio",
+    template: "%s · Kanvio",
   },
   description: "Team task management, Linear-style.",
 };

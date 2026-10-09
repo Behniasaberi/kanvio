@@ -1,36 +1,52 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Kanvio
 
-## Getting Started
+A Linear-inspired team task manager: workspaces, kanban boards and real-time collaboration.
 
-First, run the development server:
+> 🚧 Work in progress. Built in public, phase by phase.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+## Tech stack
+
+- **Next.js 16** (App Router, Server Actions, Cache Components) + **TypeScript**
+- **Tailwind CSS v4** with a custom dark design system
+- **Supabase**: Postgres, Auth, Row Level Security
+- **Feature-Sliced Design** folder structure
+
+## Roadmap
+
+**Phase 1 (MVP)**
+- [x] Email/password authentication
+- [x] Database schema with Row Level Security
+- [x] Dark design system (tokens + base components)
+- [ ] Multi-workspace
+- [ ] Kanban board with drag & drop
+
+**Phase 2:** command palette (⌘K), optimistic UI, keyboard shortcuts, activity log
+**Phase 3:** real-time sync, multiple views (board / list / calendar), tests
+**Phase 4:** offline-first, AI task assistant, analytics, presence indicators
+
+## Getting started
+
+1. Clone and install:
+   ```bash
+   pnpm install
+   ```
+2. Create a Supabase project and add `.env.local`:
+   ```env
+   NEXT_PUBLIC_SUPABASE_URL=your-project-url
+   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=your-publishable-key
+   ```
+3. Run the SQL files in `supabase/migrations/` in order, in the Supabase SQL Editor.
+4. Start the dev server:
+   ```bash
+   pnpm dev
+   ```
+
+## Project structure
+
 ```
-
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+src/
+├── app/        # routes only
+├── features/   # user actions (auth, ...)
+├── entities/   # business entities (user, ...)
+└── shared/     # ui kit, config, supabase clients
+```
