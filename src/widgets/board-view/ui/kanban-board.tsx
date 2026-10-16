@@ -16,8 +16,13 @@ import {
 } from "@dnd-kit/core";
 import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { TaskCard, type Task } from "@/entities/task";
-import type { BoardColumn as BoardColumnType } from "@/entities/board";
+import {
+  removeTask as removeTaskFrom,
+  upsertTask,
+  type BoardColumn as BoardColumnType,
+} from "@/entities/board";
 import type { WorkspaceMember } from "@/entities/workspace";
+import { LiveIndicator, useBoardRealtime } from "@/features/board-realtime";
 import { createTask } from "@/features/create-task";
 import { TaskDetailsSheet } from "@/features/edit-task";
 import { moveTask, positionBetween } from "@/features/move-task";
@@ -26,12 +31,14 @@ import { BoardColumn } from "./board-column";
 
 type KanbanBoardProps = {
   boardId: string;
+  boardName: string;
   initialColumns: BoardColumnType[];
   members: WorkspaceMember[];
 };
 
 export function KanbanBoard({
   boardId,
+  boardName,
   initialColumns,
   members,
 }: KanbanBoardProps) {
@@ -168,35 +175,34 @@ export function KanbanBoard({
       });
 
       if (result.error) {
-        setColumns((prev) =>
-          prev.map((c) => ({
-            ...c,
-            tasks: c.tasks.filter((t) => t.id !== task.id),
-          })),
-        );
+        setColumns((prev) => removeTaskFrom(prev, task.id));
         setError(`Couldn't create "${task.title}". Please try again.`);
       }
     })();
   }
 
   function replaceTask(updated: Task) {
-    setColumns((prev) =>
-      prev.map((column) => ({
-        ...column,
-        tasks: column.tasks.map((t) => (t.id === updated.id ? updated : t)),
-      })),
-    );
+    setColumns((prev) => upsertTask(prev, updated));
   }
 
   function removeTask(taskId: string) {
     setOpenTaskId(null);
-    setColumns((prev) =>
-      prev.map((column) => ({
-        ...column,
-        tasks: column.tasks.filter((t) => t.id !== taskId),
-      })),
-    );
+    setColumns((prev) => removeTaskFrom(prev, taskId));
   }
+
+  // Changes from anyone on this board (teammates and our own echoes).
+  // upsertTask is idempotent, so our own echo changes nothing.
+  const realtimeStatus = useBoardRealtime(boardId, {
+    onTaskChange: (task) => {
+      // Don't yank the card out from under a drag in progress.
+      if (activeTask?.id === task.id) return;
+      setColumns((prev) => upsertTask(prev, task));
+    },
+    onTaskDelete: (taskId) => {
+      setColumns((prev) => removeTaskFrom(prev, taskId));
+      if (openTaskId === taskId) setOpenTaskId(null);
+    },
+  });
 
   function findColumnId(id: string): string | undefined {
     if (columns.some((column) => column.id === id)) return id;
@@ -295,6 +301,11 @@ export function KanbanBoard({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
+      <header className="flex h-12 shrink-0 items-center justify-between border-b border-border px-6">
+        <h1 className="text-sm font-medium">{boardName}</h1>
+        <LiveIndicator status={realtimeStatus} />
+      </header>
+
       {error && (
         <p
           role="alert"

@@ -10,12 +10,9 @@ type BoardViewProps = {
 export function BoardView({ board, members }: BoardViewProps) {
   return (
     <div className="flex h-full flex-col">
-      <header className="flex h-12 shrink-0 items-center border-b border-border px-6">
-        <h1 className="text-sm font-medium">{board.name}</h1>
-      </header>
-
       <KanbanBoard
         boardId={board.id}
+        boardName={board.name}
         initialColumns={board.columns}
         members={members}
       />

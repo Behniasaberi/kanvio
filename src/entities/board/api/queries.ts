@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { createClient } from "@/shared/lib/supabase/server";
-import type { Task } from "@/entities/task";
+import { mapTaskRow, type Task } from "@/entities/task";
 import type { Board, BoardWithColumns } from "../model/types";
 
 export const getBoards = cache(async (workspaceId: string): Promise<Board[]> => {
@@ -48,15 +48,7 @@ export const getBoardWithColumns = cache(
     if (tasksRes.error) throw new Error(tasksRes.error.message);
     if (!boardRes.data) return null;
 
-    const tasks: Task[] = (tasksRes.data ?? []).map((row) => ({
-      id: row.id,
-      title: row.title,
-      description: row.description,
-      priority: row.priority,
-      position: row.position,
-      columnId: row.column_id,
-      assigneeId: row.assignee_id,
-    }));
+    const tasks: Task[] = (tasksRes.data ?? []).map(mapTaskRow);
 
     return {
       id: boardRes.data.id,
