@@ -1,0 +1,8 @@
+# Netlify build settings (kept in git, not just in the dashboard)
+
+[build]
+  command = "pnpm build"
+  publish = ".next"
+
+[build.environment]
+  NODE_VERSION = "22"
