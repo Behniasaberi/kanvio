@@ -35,8 +35,9 @@ export const getWorkspaceMembers = cache(
     const supabase = await createClient();
     const { data, error } = await supabase
       .from("workspace_members")
-      .select("user_id, profiles(full_name)")
-      .eq("workspace_id", workspaceId);
+      .select("user_id, role, profiles(full_name)")
+      .eq("workspace_id", workspaceId)
+      .order("joined_at", { ascending: true });
 
     if (error) throw new Error(error.message);
 
@@ -45,6 +46,7 @@ export const getWorkspaceMembers = cache(
       return {
         id: row.user_id,
         name: profile?.full_name ?? "Unnamed",
+        role: row.role,
       };
     });
   },

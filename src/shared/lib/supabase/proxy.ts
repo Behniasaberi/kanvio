@@ -1,8 +1,9 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { env } from "@/shared/config/env";
+import { NEXT_PATH_COOKIE } from "@/shared/config/auth";
 
-const PROTECTED_ROUTES = ["/dashboard", "/w/", "/workspaces"];
+const PROTECTED_ROUTES = ["/dashboard", "/w/", "/workspaces", "/invite/"];
 const AUTH_ROUTES = ["/login", "/signup"];
 
 export async function updateSession(request: NextRequest) {
@@ -54,7 +55,15 @@ export async function updateSession(request: NextRequest) {
     return redirectTo(request, isLoggedIn ? "/dashboard" : "/login", response);
   }
   if (isProtected && !isLoggedIn) {
-    return redirectTo(request, "/login", response);
+    const redirect = redirectTo(request, "/login", response);
+    // Remember where they were going, e.g. an invite link.
+    redirect.cookies.set(NEXT_PATH_COOKIE, pathname, {
+      httpOnly: true,
+      sameSite: "lax",
+      path: "/",
+      maxAge: 60 * 10,
+    });
+    return redirect;
   }
   if (isAuthRoute && isLoggedIn) {
     return redirectTo(request, "/dashboard", response);

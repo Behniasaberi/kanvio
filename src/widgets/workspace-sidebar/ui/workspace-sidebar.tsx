@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { LayoutGrid, SquareKanban } from "lucide-react";
+import { LayoutGrid, SquareKanban, Users } from "lucide-react";
 import { getCurrentUser } from "@/entities/user/server";
 import {
   getMyWorkspaces,
@@ -31,6 +31,12 @@ export async function WorkspaceSidebar({ slug }: { slug: string }) {
           icon={<LayoutGrid className="size-4" />}
         >
           All boards
+        </SidebarNavLink>
+        <SidebarNavLink
+          href={`/w/${current.slug}/members`}
+          icon={<Users className="size-4" />}
+        >
+          Members
         </SidebarNavLink>
       </nav>
 

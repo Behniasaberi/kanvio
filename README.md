@@ -17,8 +17,10 @@ A Linear-inspired team task manager: workspaces, kanban boards and real-time col
 - [x] Email/password authentication
 - [x] Database schema with Row Level Security
 - [x] Dark design system (tokens + base components)
-- [ ] Multi-workspace
-- [ ] Kanban board with drag & drop
+- [x] Multi-workspace
+- [x] Kanban board with drag & drop (optimistic updates)
+- [x] Task details: edit, assign, prioritize, delete
+- [x] Invite members with expiring links
 
 **Phase 2:** command palette (⌘K), optimistic UI, keyboard shortcuts, activity log
 **Phase 3:** real-time sync, multiple views (board / list / calendar), tests

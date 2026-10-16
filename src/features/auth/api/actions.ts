@@ -1,6 +1,8 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+import { NEXT_PATH_COOKIE, isSafeNextPath } from "@/shared/config/auth";
 import { createClient } from "@/shared/lib/supabase/server";
 
 export type AuthFormState = {
@@ -8,6 +10,14 @@ export type AuthFormState = {
   message?: string;
   fields?: { email: string; fullName?: string };
 };
+
+/** Read and clear the "go back to" path saved by the proxy. */
+async function takeNextPath(): Promise<string> {
+  const cookieStore = await cookies();
+  const next = cookieStore.get(NEXT_PATH_COOKIE)?.value;
+  cookieStore.delete(NEXT_PATH_COOKIE);
+  return isSafeNextPath(next) ? next : "/dashboard";
+}
 
 function readText(formData: FormData, name: string): string {
   const value = formData.get(name);
@@ -32,7 +42,7 @@ export async function signIn(
     return { error: "Invalid email or password.", fields: { email } };
   }
 
-  redirect("/dashboard");
+  redirect(await takeNextPath());
 }
 
 export async function signUp(
@@ -71,7 +81,7 @@ export async function signUp(
     };
   }
 
-  redirect("/dashboard");
+  redirect(await takeNextPath());
 }
 
 export async function signOut() {
