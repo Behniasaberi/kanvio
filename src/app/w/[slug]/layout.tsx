@@ -5,6 +5,7 @@ import {
   getWorkspaceBySlug,
 } from "@/entities/workspace/server";
 import { CommandPalette } from "@/features/command-palette";
+import { GlobalShortcuts } from "@/features/keyboard-shortcuts";
 import {
   WorkspaceSidebar,
   WorkspaceSidebarSkeleton,
@@ -24,6 +25,8 @@ export default function WorkspaceLayout({
         </Suspense>
       </aside>
       <main className="min-w-0 flex-1">{children}</main>
+
+      <GlobalShortcuts />
 
       <Suspense fallback={null}>
         {params.then(({ slug }) => (

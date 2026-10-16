@@ -20,6 +20,7 @@ import type { BoardColumn as BoardColumnType } from "@/entities/board";
 import type { WorkspaceMember } from "@/entities/workspace";
 import { TaskDetailsSheet } from "@/features/edit-task";
 import { moveTask, positionBetween } from "@/features/move-task";
+import { useHotkey } from "@/shared/lib/use-hotkey";
 import { BoardColumn } from "./board-column";
 
 type KanbanBoardProps = {
@@ -55,6 +56,7 @@ export function KanbanBoard({
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [snapshot, setSnapshot] = useState<BoardColumnType[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [composerColumnId, setComposerColumnId] = useState<string | null>(null);
   const [, startTransition] = useTransition();
 
   // When the server sends fresh data (e.g. a new task), use it.
@@ -83,6 +85,48 @@ export function KanbanBoard({
     columns.flatMap((column) => column.tasks).find((t) => t.id === openTaskId) ??
     null;
   const openTaskColumn = columns.find((c) => c.id === openTask?.columnId);
+
+  // "C": new task in the focused card's column, or the first column.
+  useHotkey("c", () => {
+    const focusedId = (document.activeElement as HTMLElement | null)?.dataset
+      .taskId;
+    const columnId = (focusedId && findColumnId(focusedId)) || columns[0]?.id;
+    if (columnId) setComposerColumnId(columnId);
+  });
+
+  // Arrow keys move focus between cards (not while dragging).
+  function handleBoardKeyDown(event: React.KeyboardEvent) {
+    if (activeTask) return;
+    const arrows = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+    if (!arrows.includes(event.key)) return;
+
+    const taskId = (event.target as HTMLElement).dataset.taskId;
+    if (!taskId) return;
+
+    const col = columns.findIndex((c) => c.tasks.some((t) => t.id === taskId));
+    const row = columns[col].tasks.findIndex((t) => t.id === taskId);
+    let next: Task | undefined;
+
+    if (event.key === "ArrowUp") next = columns[col].tasks[row - 1];
+    if (event.key === "ArrowDown") next = columns[col].tasks[row + 1];
+    if (event.key === "ArrowLeft" || event.key === "ArrowRight") {
+      const step = event.key === "ArrowLeft" ? -1 : 1;
+      // Skip empty columns; keep roughly the same row.
+      for (let c = col + step; c >= 0 && c < columns.length; c += step) {
+        const tasks = columns[c].tasks;
+        if (tasks.length > 0) {
+          next = tasks[Math.min(row, tasks.length - 1)];
+          break;
+        }
+      }
+    }
+
+    if (!next) return;
+    event.preventDefault();
+    document
+      .querySelector<HTMLElement>(`[data-task-id="${next.id}"]`)
+      ?.focus();
+  }
 
   function replaceTask(updated: Task) {
     setColumns((prev) =>
@@ -218,7 +262,10 @@ export function KanbanBoard({
         onDragEnd={handleDragEnd}
         onDragCancel={handleDragCancel}
       >
-        <div className="flex min-h-0 flex-1 gap-3 overflow-x-auto p-4">
+        <div
+          className="flex min-h-0 flex-1 gap-3 overflow-x-auto p-4"
+          onKeyDown={handleBoardKeyDown}
+        >
           {columns.map((column) => (
             <BoardColumn
               key={column.id}
@@ -226,6 +273,10 @@ export function KanbanBoard({
               column={column}
               memberNames={memberNames}
               onOpenTask={setOpenTaskId}
+              isComposerOpen={composerColumnId === column.id}
+              onComposerOpenChange={(isOpen) =>
+                setComposerColumnId(isOpen ? column.id : null)
+              }
             />
           ))}
         </div>

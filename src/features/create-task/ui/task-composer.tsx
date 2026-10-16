@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/shared/ui";
 import { createTask, type CreateTaskState } from "../api/actions";
@@ -10,10 +10,16 @@ const initialState: CreateTaskState = { error: null };
 type TaskComposerProps = {
   boardId: string;
   columnId: string;
+  isOpen: boolean;
+  onOpenChange: (isOpen: boolean) => void;
 };
 
-export function TaskComposer({ boardId, columnId }: TaskComposerProps) {
-  const [isOpen, setIsOpen] = useState(false);
+export function TaskComposer({
+  boardId,
+  columnId,
+  isOpen,
+  onOpenChange: setIsOpen,
+}: TaskComposerProps) {
   const [state, formAction, isPending] = useActionState(
     createTask.bind(null, boardId, columnId),
     initialState,

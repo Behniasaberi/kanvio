@@ -15,6 +15,8 @@ type BoardColumnProps = {
   column: BoardColumnType;
   memberNames: Map<string, string>;
   onOpenTask: (taskId: string) => void;
+  isComposerOpen: boolean;
+  onComposerOpenChange: (isOpen: boolean) => void;
 };
 
 export function BoardColumn({
@@ -22,6 +24,8 @@ export function BoardColumn({
   column,
   memberNames,
   onOpenTask,
+  isComposerOpen,
+  onComposerOpenChange,
 }: BoardColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
@@ -62,7 +66,12 @@ export function BoardColumn({
         </div>
       </SortableContext>
 
-      <TaskComposer boardId={boardId} columnId={column.id} />
+      <TaskComposer
+        boardId={boardId}
+        columnId={column.id}
+        isOpen={isComposerOpen}
+        onOpenChange={onComposerOpenChange}
+      />
     </section>
   );
 }

@@ -8,6 +8,7 @@ import {
 import { getBoards } from "@/entities/board/server";
 import { SignOutButton } from "@/features/auth";
 import { CommandPaletteTrigger } from "@/features/command-palette";
+import { ShortcutsButton } from "@/features/keyboard-shortcuts";
 import { WorkspaceSwitcher } from "@/features/switch-workspace";
 import { SidebarNavLink } from "./sidebar-nav-link";
 
@@ -66,6 +67,7 @@ export async function WorkspaceSidebar({ slug }: { slug: string }) {
           </p>
           <p className="truncate text-xs text-fg-subtle">{user.email}</p>
         </div>
+        <ShortcutsButton />
         <SignOutButton />
       </div>
     </div>

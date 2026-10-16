@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { WorkspaceAvatar, type Workspace } from "@/entities/workspace";
 import type { Board } from "@/entities/board";
+import { useHotkey } from "@/shared/lib/use-hotkey";
 import { useCommandPalette } from "../model/store";
 import { searchTasks, type TaskSearchResult } from "../api/actions";
 
@@ -32,7 +33,7 @@ export function CommandPalette({
   boards,
 }: CommandPaletteProps) {
   const router = useRouter();
-  const { isOpen, close, toggle } = useCommandPalette();
+  const { isOpen, open, close, toggle } = useCommandPalette();
   const [query, setQuery] = useState("");
   const [tasks, setTasks] = useState<TaskSearchResult[]>([]);
 
@@ -47,6 +48,9 @@ export function CommandPalette({
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
   }, [toggle]);
+
+  // "/" also opens search (ignored while typing in a field).
+  useHotkey("/", open);
 
   // Search tasks on the server, 200ms after the user stops typing.
   useEffect(() => {
