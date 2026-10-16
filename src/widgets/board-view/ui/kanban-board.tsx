@@ -1,6 +1,7 @@
 "use client";
 
 import { useMemo, useState, useTransition } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import {
   DndContext,
   DragOverlay,
@@ -33,7 +34,24 @@ export function KanbanBoard({
   members,
 }: KanbanBoardProps) {
   const [columns, setColumns] = useState(initialColumns);
-  const [openTaskId, setOpenTaskId] = useState<string | null>(null);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // The open task lives in the URL (?task=…), so it can be shared
+  // and opened from the command palette.
+  const taskParam = searchParams.get("task");
+  const [openTaskId, setOpenTaskIdState] = useState<string | null>(taskParam);
+  const [prevTaskParam, setPrevTaskParam] = useState(taskParam);
+  if (taskParam !== prevTaskParam) {
+    setPrevTaskParam(taskParam);
+    setOpenTaskIdState(taskParam);
+  }
+
+  function setOpenTaskId(taskId: string | null) {
+    setOpenTaskIdState(taskId);
+    const url = taskId ? `${pathname}?task=${taskId}` : pathname;
+    window.history.replaceState(null, "", url);
+  }
   const [activeTask, setActiveTask] = useState<Task | null>(null);
   const [snapshot, setSnapshot] = useState<BoardColumnType[] | null>(null);
   const [error, setError] = useState<string | null>(null);

@@ -1,4 +1,10 @@
 import { Suspense } from "react";
+import { getBoards } from "@/entities/board/server";
+import {
+  getMyWorkspaces,
+  getWorkspaceBySlug,
+} from "@/entities/workspace/server";
+import { CommandPalette } from "@/features/command-palette";
 import {
   WorkspaceSidebar,
   WorkspaceSidebarSkeleton,
@@ -18,6 +24,31 @@ export default function WorkspaceLayout({
         </Suspense>
       </aside>
       <main className="min-w-0 flex-1">{children}</main>
+
+      <Suspense fallback={null}>
+        {params.then(({ slug }) => (
+          <WorkspaceCommandPalette slug={slug} />
+        ))}
+      </Suspense>
     </div>
+  );
+}
+
+// Same queries as the sidebar: React cache() makes them one DB call each.
+async function WorkspaceCommandPalette({ slug }: { slug: string }) {
+  const [workspaces, workspace] = await Promise.all([
+    getMyWorkspaces(),
+    getWorkspaceBySlug(slug),
+  ]);
+  if (!workspace) return null;
+
+  const boards = await getBoards(workspace.id);
+
+  return (
+    <CommandPalette
+      workspace={workspace}
+      workspaces={workspaces}
+      boards={boards}
+    />
   );
 }

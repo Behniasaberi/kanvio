@@ -7,6 +7,7 @@ import {
 } from "@/entities/workspace/server";
 import { getBoards } from "@/entities/board/server";
 import { SignOutButton } from "@/features/auth";
+import { CommandPaletteTrigger } from "@/features/command-palette";
 import { WorkspaceSwitcher } from "@/features/switch-workspace";
 import { SidebarNavLink } from "./sidebar-nav-link";
 
@@ -23,7 +24,10 @@ export async function WorkspaceSidebar({ slug }: { slug: string }) {
 
   return (
     <div className="flex h-full flex-col gap-4 p-3">
-      <WorkspaceSwitcher current={current} workspaces={workspaces} />
+      <div className="flex flex-col gap-2">
+        <WorkspaceSwitcher current={current} workspaces={workspaces} />
+        <CommandPaletteTrigger />
+      </div>
 
       <nav className="flex flex-col gap-0.5">
         <SidebarNavLink
