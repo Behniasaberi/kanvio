@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import {
   DndContext,
@@ -18,6 +18,7 @@ import { arrayMove, sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { TaskCard, type Task } from "@/entities/task";
 import type { BoardColumn as BoardColumnType } from "@/entities/board";
 import type { WorkspaceMember } from "@/entities/workspace";
+import { createTask } from "@/features/create-task";
 import { TaskDetailsSheet } from "@/features/edit-task";
 import { moveTask, positionBetween } from "@/features/move-task";
 import { useHotkey } from "@/shared/lib/use-hotkey";
@@ -57,7 +58,7 @@ export function KanbanBoard({
   const [snapshot, setSnapshot] = useState<BoardColumnType[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [composerColumnId, setComposerColumnId] = useState<string | null>(null);
-  const [, startTransition] = useTransition();
+  const [pendingIds, setPendingIds] = useState<Set<string>>(() => new Set());
 
   // When the server sends fresh data (e.g. a new task), use it.
   const [prevInitial, setPrevInitial] = useState(initialColumns);
@@ -126,6 +127,56 @@ export function KanbanBoard({
     document
       .querySelector<HTMLElement>(`[data-task-id="${next.id}"]`)
       ?.focus();
+  }
+
+  // Optimistic create: show the card now, save in the background.
+  function handleCreateTask(columnId: string, title: string) {
+    const column = columns.find((c) => c.id === columnId);
+    if (!column) return;
+
+    const task: Task = {
+      id: crypto.randomUUID(),
+      title,
+      description: null,
+      priority: "none",
+      position: positionBetween(column.tasks.at(-1)?.position, undefined),
+      columnId,
+      assigneeId: null,
+    };
+
+    setError(null);
+    setColumns((prev) =>
+      prev.map((c) =>
+        c.id === columnId ? { ...c, tasks: [...c.tasks, task] } : c,
+      ),
+    );
+    setPendingIds((prev) => new Set(prev).add(task.id));
+
+    // Plain async, not a transition: each save settles on its own,
+    // even when several are in flight at once.
+    void (async () => {
+      const result = await createTask(boardId, columnId, {
+        id: task.id,
+        title: task.title,
+        position: task.position,
+      });
+
+      setPendingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(task.id);
+        return next;
+      });
+
+      if (result.error) {
+        setColumns((prev) =>
+          prev.map((c) => ({
+            ...c,
+            tasks: c.tasks.filter((t) => t.id !== task.id),
+          })),
+        );
+        setError(`Couldn't create "${task.title}". Please try again.`);
+      }
+    })();
   }
 
   function replaceTask(updated: Task) {
@@ -228,13 +279,13 @@ export function KanbanBoard({
     );
 
     const rollback = snapshot;
-    startTransition(async () => {
+    void (async () => {
       const result = await moveTask(taskId, columnId, position);
       if (result.error) {
         setColumns(rollback);
         setError("Couldn't move the task. Your change was undone.");
       }
-    });
+    })();
   }
 
   function handleDragCancel() {
@@ -269,7 +320,6 @@ export function KanbanBoard({
           {columns.map((column) => (
             <BoardColumn
               key={column.id}
-              boardId={boardId}
               column={column}
               memberNames={memberNames}
               onOpenTask={setOpenTaskId}
@@ -277,6 +327,8 @@ export function KanbanBoard({
               onComposerOpenChange={(isOpen) =>
                 setComposerColumnId(isOpen ? column.id : null)
               }
+              onCreateTask={handleCreateTask}
+              pendingIds={pendingIds}
             />
           ))}
         </div>

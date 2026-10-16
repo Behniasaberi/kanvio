@@ -1,29 +1,28 @@
 "use client";
 
-import { useActionState } from "react";
+import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Button } from "@/shared/ui";
-import { createTask, type CreateTaskState } from "../api/actions";
-
-const initialState: CreateTaskState = { error: null };
 
 type TaskComposerProps = {
-  boardId: string;
-  columnId: string;
   isOpen: boolean;
   onOpenChange: (isOpen: boolean) => void;
+  onCreate: (title: string) => void;
 };
 
 export function TaskComposer({
-  boardId,
-  columnId,
   isOpen,
   onOpenChange: setIsOpen,
+  onCreate,
 }: TaskComposerProps) {
-  const [state, formAction, isPending] = useActionState(
-    createTask.bind(null, boardId, columnId),
-    initialState,
-  );
+  const [title, setTitle] = useState("");
+
+  function submit() {
+    const trimmed = title.trim();
+    if (!trimmed) return;
+    onCreate(trimmed); // the board shows it immediately
+    setTitle(""); // stay open for the next task
+  }
 
   if (!isOpen) {
     return (
@@ -39,9 +38,17 @@ export function TaskComposer({
   }
 
   return (
-    <form action={formAction} className="flex flex-col gap-2">
+    <form
+      onSubmit={(event) => {
+        event.preventDefault();
+        submit();
+      }}
+      className="flex flex-col gap-2"
+    >
       <textarea
         name="title"
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
         required
         maxLength={200}
         rows={2}
@@ -51,20 +58,15 @@ export function TaskComposer({
         onKeyDown={(event) => {
           if (event.key === "Enter" && !event.shiftKey) {
             event.preventDefault();
-            event.currentTarget.form?.requestSubmit();
+            submit();
           }
           if (event.key === "Escape") setIsOpen(false);
         }}
         className="w-full resize-none rounded-md border border-border bg-bg p-2 text-sm outline-none placeholder:text-fg-subtle focus:border-accent focus:ring-2 focus:ring-accent/25"
       />
-      {state.error && (
-        <p role="alert" className="text-xs text-danger">
-          {state.error}
-        </p>
-      )}
       <div className="flex gap-2">
-        <Button type="submit" size="sm" disabled={isPending}>
-          {isPending ? "Adding…" : "Add"}
+        <Button type="submit" size="sm">
+          Add
         </Button>
         <Button
           type="button"

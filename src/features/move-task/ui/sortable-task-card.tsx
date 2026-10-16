@@ -8,12 +8,14 @@ import { cn } from "@/shared/lib/cn";
 type SortableTaskCardProps = {
   task: Task;
   assigneeName?: string;
+  isPending?: boolean;
   onOpen: (taskId: string) => void;
 };
 
 export function SortableTaskCard({
   task,
   assigneeName,
+  isPending = false,
   onOpen,
 }: SortableTaskCardProps) {
   const {
@@ -23,7 +25,12 @@ export function SortableTaskCard({
     transform,
     transition,
     isDragging,
-  } = useSortable({ id: task.id, data: { type: "task" } });
+  } = useSortable({
+    id: task.id,
+    data: { type: "task" },
+    // Not saved yet: can't be moved until the server confirms it.
+    disabled: isPending,
+  });
 
   return (
     <div
@@ -36,6 +43,7 @@ export function SortableTaskCard({
       className={cn(
         "cursor-grab touch-none rounded-md outline-none focus-visible:ring-2 focus-visible:ring-accent/50 active:cursor-grabbing",
         isDragging && "opacity-30",
+        isPending && "pointer-events-none opacity-60",
       )}
       {...attributes}
       {...listeners}

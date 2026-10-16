@@ -11,21 +11,23 @@ import { SortableTaskCard } from "@/features/move-task";
 import { cn } from "@/shared/lib/cn";
 
 type BoardColumnProps = {
-  boardId: string;
   column: BoardColumnType;
   memberNames: Map<string, string>;
   onOpenTask: (taskId: string) => void;
   isComposerOpen: boolean;
   onComposerOpenChange: (isOpen: boolean) => void;
+  onCreateTask: (columnId: string, title: string) => void;
+  pendingIds: Set<string>;
 };
 
 export function BoardColumn({
-  boardId,
   column,
   memberNames,
   onOpenTask,
   isComposerOpen,
   onComposerOpenChange,
+  onCreateTask,
+  pendingIds,
 }: BoardColumnProps) {
   const { setNodeRef, isOver } = useDroppable({
     id: column.id,
@@ -60,6 +62,7 @@ export function BoardColumn({
               assigneeName={
                 task.assigneeId ? memberNames.get(task.assigneeId) : undefined
               }
+              isPending={pendingIds.has(task.id)}
               onOpen={onOpenTask}
             />
           ))}
@@ -67,10 +70,9 @@ export function BoardColumn({
       </SortableContext>
 
       <TaskComposer
-        boardId={boardId}
-        columnId={column.id}
         isOpen={isComposerOpen}
         onOpenChange={onComposerOpenChange}
+        onCreate={(title) => onCreateTask(column.id, title)}
       />
     </section>
   );

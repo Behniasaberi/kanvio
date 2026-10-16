@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { Trash2 } from "lucide-react";
+import { ActivityFeed } from "@/entities/activity";
 import {
   PRIORITIES,
   PRIORITY_LABELS,
@@ -71,22 +72,24 @@ function TaskDetailsForm({
   const [title, setTitle] = useState(task.title);
   const [description, setDescription] = useState(task.description ?? "");
   const [error, setError] = useState<string | null>(null);
+  const [activityVersion, setActivityVersion] = useState(0);
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [isDeleting, startDelete] = useTransition();
-  const [, startSave] = useTransition();
 
   // Optimistic save: update the board now, undo if the server says no.
   function save(patch: TaskPatch, next: Task) {
     const previous = task;
     onChange(next);
     setError(null);
-    startSave(async () => {
+    void (async () => {
       const result = await updateTask(task.id, patch);
       if (result.error) {
         onChange(previous);
         setError(result.error);
+      } else {
+        setActivityVersion((v) => v + 1); // show the new history entry
       }
-    });
+    })();
   }
 
   function saveTitle() {
@@ -195,7 +198,7 @@ function TaskDetailsForm({
             value={description}
             onChange={(event) => setDescription(event.target.value)}
             onBlur={saveDescription}
-            rows={8}
+            rows={4}
             maxLength={5000}
             placeholder="Add more detail…"
             className="w-full resize-y rounded-md border border-border bg-bg p-3 text-sm outline-none placeholder:text-fg-subtle hover:border-border-strong focus:border-accent focus:ring-2 focus:ring-accent/25"
@@ -207,6 +210,10 @@ function TaskDetailsForm({
             {error}
           </p>
         )}
+
+        <div className="border-t border-border pt-5">
+          <ActivityFeed taskId={task.id} version={activityVersion} />
+        </div>
       </div>
 
       <div className="flex items-center justify-between border-t border-border p-4">
